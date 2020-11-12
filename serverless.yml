@@ -22,11 +22,16 @@ provider:
 
 custom:
   exportGitVariables: false
+  elasticsearchEndpoint: ${ssm:/iow/aws/vpc/${self:provider.stage}/elasticsearchEndpoint}
   vpc:
     securityGroupIds: ${ssm:/iow/retriever-capture/${self:provider.stage}/securityGroupIds~split}
     subnetIds: ${ssm:/iow/aws/vpc/${self:provider.stage}/subnetIds~split}
   db:
     connectInfo: ${ssm:/aws/reference/secretsmanager/NWCAPTURE-DB-${self:provider.stage}~true}
+  esLogs:
+    endpoint: ${self.custom.elasticsearchEndpoint}
+    index: dvstat
+    retentionInDays: 90
 
 functions:
   transform:
@@ -94,6 +99,7 @@ resources:
 
 plugins:
   - serverless-plugin-git-variables
+  - serverless-es-logs
 
 package:
   artifact: aqts-capture-dvstat-transform-aws.jar
